@@ -82,31 +82,33 @@ public class Console {
 				legitCheck = false;
 			temp = c;
 		}
-		if(addPath.charAt(0) == '\\')							// erasing all direct entries
-			legitCheck = false;
+//		if(addPath.charAt(0) == '\\') {
+//			legitCheck = false;
+//			System.out.println("entered");
+//		}
 		return legitCheck;
 	}
 	
-	private ArrayList<String> changePath(String addPath, String currentPath) {			// DIRECT PATH CASE
+	private ArrayList<String> preparePath(String addPath, String currentPath) {
 		ArrayList<String> pathInception = new ArrayList<String>();
 		int size = 0;
 		String tmp = "";
-		if(addPath.length() > currentPath.length()) {			// DISCLAIMER FOR PARTITION CHECK IN PATH "C:" - to avoid ":" exception for "C:\..."
+		if(addPath.length() > 2) {			// DISCLAIMER FOR PARTITION CHECK "X:\"
 			tmp = addPath.substring(0, 2);
 			addPath = addPath.substring(2);
 		}
 		boolean legitCheck = checkLegit(addPath);
-		if(!legitCheck) { 
-			System.out.println("NOT LEGIT");
+		if(!legitCheck) 
 			return null;
-		}else {
+		else {
 			addPath = tmp.concat(addPath);						// DISCLAIMER REVERSAL
 			if(addPath.charAt(addPath.length() - 1) == '\\') 
 				addPath = new StringBuilder(addPath).deleteCharAt(addPath.length() - 1).toString();
 			char[] pathLetters = addPath.toCharArray();
-			for(char c : pathLetters)
+			for(char c : pathLetters) {
 				if(c == '\\')
 					size++;
+			}
 			String path = addPath;
 			String toAdd = "";
 			for(int i = 0; i <= size; i++) {
@@ -126,32 +128,79 @@ public class Console {
 	
 	private String changePathCD(String addPath, String currentPath) {
 		String errorMessege = ">fail";
-		ArrayList<String> pathInception = changePath(addPath, currentPath);
-//		System.out.println(pathInception.get(0));			// tu juz jest nullem
-		if(pathInception == null)
+		ArrayList<String> pathInception = preparePath(addPath, currentPath);
+//		for(String p : pathInception) {													// print out path structure
+//			System.out.println(p);
+//		}
+		if(pathInception == null) 
 			return errorMessege;
-		for(String nextFolder : pathInception) {
-			currentPath = currentPath.concat("\\").concat(nextFolder);
-			File toEnter = new File(currentPath);
-			if(!toEnter.exists())
-				return errorMessege;
-		}
-//			System.out.println("Final path: " + currentPath);
+		boolean ifDirectPath = false;
+		for(String d : drivesList)
+	    	if(pathInception.get(0).equalsIgnoreCase(d))
+	    		ifDirectPath = true;
+		if(ifDirectPath) {																// DIRECT PATH ENTRY CASE
+			String directPath = "";
+			for(String nextFolder : pathInception) {
+				if(directPath.length() == 0)
+					directPath = directPath.concat(nextFolder);
+				else
+					directPath = directPath.concat("\\").concat(nextFolder);
+				File toEnter = new File(directPath);
+				if(!toEnter.exists()) {
+					System.out.println("Direct path failed at: " + directPath);
+					return errorMessege;
+				}
+				currentPath = directPath;
+			}
+		}else 																			// PENETRATING ENTRY CASE
+			for(String nextFolder : pathInception) {
+					currentPath = currentPath.concat("\\").concat(nextFolder);
+					File toEnter = new File(currentPath);
+					if(!toEnter.exists()) {
+						System.out.println("Penetrating entry failed at: " + currentPath);
+						return errorMessege;
+					}
+			}
+//		System.out.println("Final path: " + currentPath);
 		return currentPath;
 	}
 	
-	public String changeMkdir(String addPath, String currentPath) {
+	private String changePathDirectory(String addPath, String currentPath) {
 		String errorMessege = ">fail";
-		ArrayList<String> pathInception = changePath(addPath, currentPath);
-		if(pathInception == null)
+		ArrayList<String> pathInception = preparePath(addPath, currentPath);
+//		for(String p : pathInception) {													// print out path structure
+//			System.out.println(p);
+//		}
+		if(pathInception == null) 
 			return errorMessege;
-		for(String nextFolder : pathInception) {
-			currentPath = currentPath.concat("\\").concat(nextFolder);
-			File toEnter = new File(currentPath);
-			if(!toEnter.exists())
-				return errorMessege;
-			System.out.println("Final path: " + currentPath);
-		}
+		boolean ifDirectPath = false;
+		for(String d : drivesList)
+	    	if(pathInception.get(0).equalsIgnoreCase(d))
+	    		ifDirectPath = true;
+		if(ifDirectPath) {																// DIRECT PATH ENTRY CASE
+			String directPath = "";
+			for(String nextFolder : pathInception) {
+				if(directPath.length() == 0)
+					directPath = directPath.concat(nextFolder);
+				else
+					directPath = directPath.concat("\\").concat(nextFolder);
+				File toEnter = new File(directPath);
+				if(!toEnter.exists()) {
+					toEnter.mkdir();
+					System.out.println("Created bridge folder at: " + directPath);
+				}
+				currentPath = directPath;
+			}
+		}else 																			// PENETRATING ENTRY CASE
+			for(String nextFolder : pathInception) {
+					currentPath = currentPath.concat("\\").concat(nextFolder);
+					File toEnter = new File(currentPath);
+					if(!toEnter.exists()) {
+						toEnter.mkdir();
+						System.out.println("Created bridge folder at: " + currentPath);
+					}
+			}
+//		System.out.println("Final path: " + currentPath);
 		return currentPath;
 	}
 	
@@ -180,17 +229,9 @@ public class Console {
 	}
 	
 	public String createCD(String currentPath, String input) {
-
 		String newPath = "";
 		String addPath = input.substring(3);
-		boolean ifOnDisksList = false;
-		for(String d : drivesList)
-	    	if(addPath.equalsIgnoreCase(d))
-	    		ifOnDisksList = true;
-		if(((addPath.length() > 3 || ifOnDisksList) || currentPath.substring(0, (addPath.length()) - 1).equalsIgnoreCase(addPath)) && currentPath.length() >= addPath.length())
-			newPath = addPath;
-		else
-			newPath = changePathCD(addPath, currentPath);
+		newPath = changePathCD(addPath, currentPath);
 		if(newPath.equals(">fail")) {
 			System.out.println("User entered invalid(unexisting) path. Operation aborted.");
 			newPath = currentPath;
@@ -200,10 +241,43 @@ public class Console {
 	
 	public void makeDirectory(String currentPath, String input) {
 		String addPath = input.substring(6);
-		
-		String newPath = changePathCD(addPath, currentPath);
-		if(newPath.equals(">fail"))
-			System.out.println("User entered invalid path consisting of illegal symbols. Operation aborted.");
+		int slashCounter = 0;
+		int newFolderLength = 0;
+		File newFolder;
+		String folder = "";
+		if(addPath.charAt(addPath.length() - 1) == '\\')
+			addPath = addPath.substring(0, addPath.length() - 1);
+		char[] path = addPath.toCharArray();
+		for(char c : path) {
+			if(c == '\\')
+				slashCounter++;
+		}
+		if(slashCounter > 0) {
+			StringBuilder sb = new StringBuilder(addPath);
+			sb.reverse();
+			char[] reversedPath = sb.toString().toCharArray();
+			for(int i = 0; reversedPath[i] != '\\'; i++) {
+				newFolderLength++;
+			}
+			folder = addPath.substring(addPath.length() - newFolderLength);
+			addPath = addPath.substring(0, addPath.length() - (newFolderLength + 1));
+//			System.out.println(addPath + " " + folder);
+		}else
+			folder = addPath;
+		if(checkLegit(folder)) {
+			if(slashCounter > 0) {
+				String newPath = changePathDirectory(addPath, currentPath);
+				if(newPath.equals(">fail"))
+					System.out.println("User entered invalid path consisting of illegal symbols. Operation aborted.");
+				newFolder = new File(newPath + "\\" + folder);
+			}else {
+				newFolder = new File(currentPath + "\\" + folder);
+			}
+			if(newFolder.exists()) {
+				System.out.println("Specified directory for name entered by user already exists");
+			}else
+				newFolder.mkdir();
+		}
 	}
 	
 	

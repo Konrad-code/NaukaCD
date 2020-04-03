@@ -39,14 +39,14 @@ public class Main {
 	private static String getInputExtended(String input, Console cmd){
 		String output = "no match";
 		for(String extendedCommand : cmd.getExtendedCommands())
-			if(input.startsWith(extendedCommand))
+			if(input.startsWith(extendedCommand) && extendedCommand.length() < input.length())
 				output = input;
 		return output;
 	}
 		
 	private static String provideInput(Console cmd, Scanner in, String currentPath) {
 		boolean ifProperInput = true;
-		String input ="";
+		String input = "";
 		while(ifProperInput) {
 			input = in.nextLine();
 //            input = input.toLowerCase();
