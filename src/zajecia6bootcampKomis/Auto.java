@@ -13,8 +13,10 @@ public class Auto {
 	private int cena;
 	private boolean czyUszkodzony;
 	
-	public Auto(int numer, String marka, String model, String nadwozie, double pojemnoscSilnika, String paliwo, int rocznik, int przebieg, int cena, boolean czyUszkodzony) 
-	{
+	public Auto() {
+	}
+	
+	public Auto(int numer, String marka, String model, String nadwozie, double pojemnoscSilnika, String paliwo, int rocznik, int przebieg, int cena, boolean czyUszkodzony){
 		this.numer = numer;
 		this.marka = marka;
 		this.model = model;

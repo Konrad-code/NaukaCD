@@ -1,5 +1,6 @@
 package zajecia5bootcamp;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.io.File;
@@ -243,6 +244,9 @@ public class Main5 {
 //    	}
     	*/
     	
+    	ArrayList<String> array = new ArrayList<String>();
+    	while(1>0)
+    		array.add("smdoadsoasdjsadiasdjoasdsadooasdasdosad");
 
     
     }

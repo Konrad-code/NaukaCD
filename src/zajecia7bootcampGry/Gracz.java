@@ -49,10 +49,6 @@ public class Gracz {
 		return iloscGodzin;}
 
 	public void setIloscGodzin(int iloscGodzin) {
-		this.iloscGodzin = iloscGodzin;
-	}
-	
-	
-	}
+		this.iloscGodzin = iloscGodzin;}
 	
 }

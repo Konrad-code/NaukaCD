@@ -7,15 +7,13 @@ public class Komis {
 			new Auto(3, "BMW", "E39", "touring", 2.5, "klekot", 1999, 300000, 8000, false),
 			new Auto(4, "Maseratti", "Quattroporte", "GT", 4.0, "benzyna", 2004, 120000, 55000, false),
 	};
-
-	public void wypiszStan()
-		{
+	
+	public void wypiszStan(){
 		for(Auto s: stan)
 			System.out.println(s + "\n\n");
 		}
 	
-	public void dodajAuto(Auto noweAuto)
-	{
+	public void dodajAuto(Auto noweAuto){
 		Auto[] newTab = new Auto[stan.length + 1];
 		for(int i = 0; i < stan.length; i++)
 			newTab[i] = stan[i];
@@ -25,9 +23,20 @@ public class Komis {
 		stan = newTab;
 	}
 	
-	public void sprzedajAuto()
-	{
-		
+	public void sprzedajAuto(int indeks){
+		Auto[] pomniejszonyStan = new Auto[stan.length - 1];
+		int j = 0;
+		System.out.println("Auto do sprzedania o numerze: " + indeks + " znajdujace sie w tablicy pod indeksem: " + (indeks - 1));
+		for(int i = 0; i < stan.length; i++)
+			if((indeks - 1) != i) {
+				System.out.println(i);
+				pomniejszonyStan[j++] = stan[i];
+//				pomniejszonyStan[j].setNumer(j + 1);	// nie wiem czemu to mi wysypuje NullPointerException :(
+			}
+		stan = pomniejszonyStan;
+		for(int i = 0; i < stan.length; i++) {
+			stan[i].setNumer(i + 1);
+		}
 	}
 
 }
