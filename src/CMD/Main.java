@@ -76,6 +76,8 @@ public class Main {
 		String input = "";
 		int i = 0;
 		while(!exit) {
+			String string = "ssdsad";
+			System.out.println(string.indexOf("\\"));
 			System.out.print(currentPath + ">");
 			input = provideInput(cmd, in, currentPath);
 			if(input.equalsIgnoreCase("exit")) { 

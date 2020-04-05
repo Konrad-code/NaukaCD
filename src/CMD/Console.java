@@ -76,7 +76,7 @@ public class Console {
 //		System.out.println("Extracted path: " + addPath);
 		char temp = 'a';
 		for (char c : pathLetters) {
-			if(!(c >= '!' && c <= '~') || c == '/' || c == ':' || c == '*' || c == '?' || c == '"' || c == '<' || c == '>' || c == '|')
+			if(!(c >= ' ' && c <= '~') || c == '/' || c == ':' || c == '*' || c == '?' || c == '"' || c == '<' || c == '>' || c == '|')
 				legitCheck = false;
 			if(c == '\\' && c == temp)
 				legitCheck = false;
@@ -98,6 +98,7 @@ public class Console {
 			addPath = addPath.substring(2);
 		}
 		boolean legitCheck = checkLegit(addPath);
+		System.out.println(legitCheck);
 		if(!legitCheck) 
 			return null;
 		else {
@@ -122,6 +123,33 @@ public class Console {
 				}
 				pathInception.add(toAdd);
 			}
+		for(String p : pathInception) {													// print out path structure
+			System.out.println("Folder: " + p);
+		}
+			char[] spaceSearch = pathInception.get(0).toCharArray();
+			StringBuilder newString = new StringBuilder();
+			boolean flag = false;
+			System.out.println(pathInception.get(0));
+			if(spaceSearch[0] == ' ') {
+				for(int i = 0; i < spaceSearch.length; i++) {
+					if(flag) {
+						newString.append(spaceSearch[i]);
+						System.out.println("i" + i + "znak: " + spaceSearch[i]);
+					}
+					if(i + 1 < spaceSearch.length && !flag)
+						if(spaceSearch[i + 1] != ' ')
+							flag = true;
+				}
+				System.out.println("pierwsze ze spacja");
+			}
+		for(String p : pathInception) {													// print out path structure
+			System.out.println(p);
+		}
+			if(flag) {
+				pathInception.set(0, newString.toString());
+				System.out.println("weszlo");
+			}else
+				return null;
 		}
 		return pathInception;
 	}
@@ -231,6 +259,13 @@ public class Console {
 	public String createCD(String currentPath, String input) {
 		String newPath = "";
 		String addPath = input.substring(3);
+		boolean ifOnDisksList = false;
+		for(String d : drivesList)
+	    	if(addPath.equalsIgnoreCase(d))
+	    		ifOnDisksList = true;
+		if(currentPath.length() >= addPath.length() && (ifOnDisksList || currentPath.substring(0, (addPath.length()) - 1).equalsIgnoreCase(addPath)))
+			newPath = addPath;
+		else
 		newPath = changePathCD(addPath, currentPath);
 		if(newPath.equals(">fail")) {
 			System.out.println("User entered invalid(unexisting) path. Operation aborted.");
@@ -238,6 +273,174 @@ public class Console {
 		}
 		return newPath;
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public String createCDSimple(String currentPath, String input) {
+		String newPath = "";
+		String addPath = input.substring(3);
+		newPath = changePathCDSimple(addPath, currentPath);
+		if(newPath.equals(">fail")) {
+			System.out.println("User entered invalid(unexisting) path. Operation aborted.");
+			newPath = currentPath;
+		}
+		return newPath;
+	}
+	
+	private boolean checkLegitSimple(String addPath) {
+		char[] pathLetters = addPath.toCharArray();
+		boolean legitCheck = true;
+//		System.out.println("Extracted path: " + addPath);
+		char temp = 'a';
+		for (char c : pathLetters) {
+			if(!(c >= ' ' && c <= '~') || c == '/' || c == ':' || c == '*' || c == '?' || c == '"' || c == '<' || c == '>' || c == '|')
+				legitCheck = false;
+			if(c == '\\' && c == temp)
+				legitCheck = false;
+			temp = c;
+		}
+//		if(addPath.charAt(0) == '\\') {
+//			legitCheck = false;
+//			System.out.println("entered");
+//		}
+		return legitCheck;
+	}
+	
+	private ArrayList<String> preparePathSimple(String addPath, String currentPath) {
+		ArrayList<String> pathInception = new ArrayList<String>();
+		int size = 0;
+		char[] slashSearch = addPath.toCharArray();
+		StringBuilder slashString = new StringBuilder();
+		boolean flagSlash = false;
+		if(slashSearch[slashSearch.length - 1] == '\\') {
+			for(int i = slashSearch.length - 1; i >= 0; i--) {
+				if(flagSlash) {
+					slashString.append(slashSearch[i]);
+					System.out.println("i" + i + "znak: " + slashSearch[i]);
+				}
+				if(i - 1 < 0 && !flagSlash)
+					if(slashSearch[i - 1] != '\\')
+						flagSlash = true;
+			}
+			slashString.reverse();
+			if(flagSlash) {
+				addPath = slashString.toString();
+				System.out.println("weszlo");
+			}else
+				return null;
+		}
+			
+		boolean legitCheck = checkLegitSimple(addPath);
+		if(!legitCheck) 
+			return null;
+		else {
+			char[] pathLetters = addPath.toCharArray();
+			for(char c : pathLetters) {
+				if(c == '\\')
+					size++;
+			}
+			String path = addPath;
+			String toAdd = "";
+			for(int i = 0; i <= size; i++) {
+//				System.out.println("path = " + path);
+				if(path.indexOf("\\") != -1) {
+					toAdd = path.substring(0, path.indexOf("\\"));
+					path = path.substring(path.indexOf("\\") + 1);
+//					System.out.println("path = " + path + ", a toAdd dodawany do tab = " + toAdd);
+				}else {
+					toAdd = path;
+				}
+				pathInception.add(toAdd);
+			}
+		for(String p : pathInception) {													// print out path structure
+			System.out.println("Folder: " + p);
+		}
+			char[] spaceSearch = pathInception.get(0).toCharArray();
+			StringBuilder newString = new StringBuilder();
+			boolean flag = false;
+			System.out.println(pathInception.get(0));
+			if(spaceSearch[0] == ' ') {
+				for(int i = 0; i < spaceSearch.length; i++) {
+					if(flag) {
+						newString.append(spaceSearch[i]);
+						System.out.println("i" + i + "znak: " + spaceSearch[i]);
+					}
+					if(i + 1 < spaceSearch.length && !flag)
+						if(spaceSearch[i + 1] != ' ')
+							flag = true;
+				}
+				System.out.println("pierwsze ze spacja");
+			}
+		for(String p : pathInception) {													// print out path structure
+			System.out.println(p);
+		}
+			if(flag) {
+				pathInception.set(0, newString.toString());
+				System.out.println("weszlo");
+			}else
+				return null;
+		}
+		return pathInception;
+	}
+	
+	private String changePathCDSimple(String addPath, String currentPath) {
+		String errorMessege = ">fail";
+		ArrayList<String> pathInception = preparePathSimple(addPath, currentPath);
+//		for(String p : pathInception) {													// print out path structure
+//			System.out.println(p);
+//		}
+		if(pathInception == null) 
+			return errorMessege;
+		boolean ifDirectPath = false;
+		for(String d : drivesList)
+	    	if(pathInception.get(0).equalsIgnoreCase(d))
+	    		ifDirectPath = true;
+		if(ifDirectPath) {																// DIRECT PATH ENTRY CASE
+			String directPath = "";
+			for(String nextFolder : pathInception) {
+				if(directPath.length() == 0)
+					directPath = directPath.concat(nextFolder);
+				else
+					directPath = directPath.concat("\\").concat(nextFolder);
+				File toEnter = new File(directPath);
+				if(!toEnter.exists()) {
+					System.out.println("Direct path failed at: " + directPath);
+					return errorMessege;
+				}
+				currentPath = directPath;
+			}
+		}else 																			// PENETRATING ENTRY CASE
+			for(String nextFolder : pathInception) {
+					currentPath = currentPath.concat("\\").concat(nextFolder);
+					File toEnter = new File(currentPath);
+					if(!toEnter.exists()) {
+						System.out.println("Penetrating entry failed at: " + currentPath);
+						return errorMessege;
+					}
+			}
+//		System.out.println("Final path: " + currentPath);
+		return currentPath;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	public void makeDirectory(String currentPath, String input) {
 		String addPath = input.substring(6);
