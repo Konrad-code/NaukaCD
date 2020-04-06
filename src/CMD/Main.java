@@ -76,8 +76,6 @@ public class Main {
 		String input = "";
 		int i = 0;
 		while(!exit) {
-			String string = "ssdsad";
-			System.out.println(string.indexOf("\\"));
 			System.out.print(currentPath + ">");
 			input = provideInput(cmd, in, currentPath);
 			if(input.equalsIgnoreCase("exit")) { 
@@ -88,7 +86,15 @@ public class Main {
 			else if(input.equalsIgnoreCase("cd")) 
 				cmd.executeCD(currentPath);
 			else if(input.startsWith("cd ")) {
-				currentPath = cmd.createCD(currentPath, input);
+				String temp = cmd.spaceSearchDirect(cmd.clearSlash(input.substring(3)));
+				System.out.println(temp.substring(0, 2));
+				if(temp.length() > 1 && temp.charAt(1) == ':')
+					currentPath = cmd.createCDDirect(currentPath, input);
+//		 works correct for for example: <cd    C:\\\Users\mHm_MaXi\\\Desktop\AKADEMIA KODU\\\23 zajecia\2 zadanie (logowania) Konrad\\\\\>
+				else if(temp.length() > 1 && temp.substring(0, 2).equals("/D"))
+					currentPath = cmd.createCDDiskDirect(currentPath, input);
+				else
+					currentPath = cmd.createCDSimple(currentPath, input);
 			}else if(input.startsWith("mkdir ")) {
 				cmd.makeDirectory(currentPath, input);
 			}else if(input.equalsIgnoreCase("cmd")) {
