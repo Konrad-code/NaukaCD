@@ -1,9 +1,15 @@
 package CMD;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.Collator;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -11,11 +17,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.Scanner;
 
 public class Console {
-	private ArrayList<String> simpleCommands = new ArrayList<String>(Arrays.asList("cd", "cd..", "help", "dir", "exit", "cmd", "chdir", "chdir.."));
-	private ArrayList<String> extendedCommands = new ArrayList<String>(Arrays.asList("cd ", "mkdir ", "replace ", "rename ", "rmdir ", "del ", "chdir "));
+	private ArrayList<String> simpleCommands = new ArrayList<String>(Arrays.asList("cd", "cd..", "help", "dir", "exit", "cmd", "chdir", "chdir..", "time", "ver"));
+	private ArrayList<String> extendedCommands = new ArrayList<String>(Arrays.asList("cd ", "mkdir ", "replace ", "rename ", "rmdir ", "del ", "chdir ", "md ", "ren ", "copy ", "move "));
 	private HashMap<String, String> helpCommands = new HashMap<String, String>();
 	private List<Map.Entry<String, String>> sortedHelpCommands = new ArrayList<Map.Entry<String, String>>(helpCommands.entrySet());
 	private ArrayList<String> drivesList = new ArrayList<String>();
@@ -29,21 +35,28 @@ public class Console {
 	private void fillHelp() {															// filling of hashmap of help commands and their desctriptions from Windows CMD				
 		helpCommands.put("CD", "Displays the name of or changes the current directory");
 		helpCommands.put("CD..", "Changes the current directory to a higher directory");
-//		helpCommands.put("MKDIR", "Creates a directory");
+		helpCommands.put("MKDIR", "Creates a directory");
 		helpCommands.put("HELP", "Provides Help information for Windows commands");
-//		helpCommands.put("DIR", "Displays a list of files and subdirectories in a directory");
+		helpCommands.put("DIR", "Displays a list of files and subdirectories in a directory");
 		helpCommands.put("EXIT", "Quits the CMD.EXE program");
-//		helpCommands.put("REPLACE", "Replaces files");
-//		helpCommands.put("RENAME", "Renames a file");
-//		helpCommands.put("RMDIR", "Removes a directory");
-//		helpCommands.put("DEL", "Deletes one file");
+		helpCommands.put("REPLACE", "Replaces a file");
+		helpCommands.put("RENAME", "Renames a file");
+		helpCommands.put("RMDIR", "Removes a directory");
+		helpCommands.put("DEL", "Deletes one file");
 		helpCommands.put("CMD", "Starts a new instance of the Windows command interpreter");
 		helpCommands.put("CD [path]", "Changes the current directory to specified in a direct path");
 		helpCommands.put("CD [/D] [drive:][path]", "Use the /D switch to change current drive in addition to changing current directory for a drive");
-		helpCommands.put("CHDIR [path]", "Changes the current directory to specified in a direct path");
 		helpCommands.put("CHDIR", "Displays the name of or changes the current directory");
 		helpCommands.put("CHDIR..", "Changes the current directory to a higher directory");
-		
+		helpCommands.put("CHDIR [path]", "Changes the current directory to specified in a direct path");
+		helpCommands.put("CHDIR [/D] [drive:][path]", "Use the /D switch to change current drive in addition to changing current directory for a drive");
+		helpCommands.put("MKDIR [path]", "Creates a directory as specified in a direct path");
+		helpCommands.put("MD", "Creates a directory");
+		helpCommands.put("MD [path]", "Creates a directory as specified in a direct path");
+		helpCommands.put("TIME", "Displays or sets the system time");
+		helpCommands.put("REN", "Renames a file");
+		helpCommands.put("COPY", "Copies one file to another location");
+		helpCommands.put("MOVE", "Moves file from one location to another");
 	}
 	
 	private void sortHelp() {																		// method sorting help commands hashmap keys by alphabet
@@ -502,6 +515,169 @@ public class Console {
 			currentPath = newPath.toString();
 		}
 		return currentPath;
+	}
+
+	public void showTime() {																		// show time
+		DateFormat currentTime = new SimpleDateFormat("HH:mm:ss");
+		Calendar currentDate = Calendar.getInstance();
+		System.out.println(currentTime.format(currentDate.getTime()));
+	}
+
+	public void showVersion() {																		// show os version
+		System.out.println("Microsoft " + System.getProperty("os.name"));
+	}
+	
+	public void deleteFile(String currentPath, String input) {										// method for deleting files
+		String fileName = input.substring(4);
+		if(fileName.length() > 0) {
+			File toDelete = new File(currentPath + "\\" + input);
+			if(toDelete.isFile())
+				toDelete.delete();
+			else
+				System.out.println("Could Not Find " + input);
+		}else
+			System.out.println("The syntax of the command is incorrect");
+	}
+	
+	public void removeDirectory(String currentPath, String input) {									// method for removing directories
+		String directoryName = input.substring(6);
+		if(directoryName.length() > 0) {
+			File directoryToRemove = new File(currentPath + "\\" + input);
+			if(directoryToRemove.isDirectory())
+				directoryToRemove.delete();
+			else
+				System.out.println("Couldn't find specified file");
+		}else
+			System.out.println("The syntax of the command is incorrect");
+	}
+	
+	public void renameFile(String currentPath, String input) {										// method for renaming files
+		String command = input.substring(6);
+		String NameOfFileToBeRenamed, newName;
+		String[] names = command.split(" ");
+		if(names.length == 2) {
+			NameOfFileToBeRenamed = names[0];
+			newName = names[1];
+			File fileToBeRenamed = new File(currentPath + "\\" + NameOfFileToBeRenamed);
+			File newFileName = new File(currentPath + "\\" + newName);
+			if(fileToBeRenamed.exists())
+				fileToBeRenamed.renameTo(newFileName);
+			else
+				System.out.println("Couldn't find specified file");
+		}else
+			System.out.println("The syntax of the command is incorrect");
+	}
+	
+	public void renFile(String currentPath, String input) {											// method for renaming files
+		String command = input.substring(4);
+		String NameOfFileToBeRenamed, newName;
+		String[] names = command.split(" ");
+		if(names.length == 2) {
+			NameOfFileToBeRenamed = names[0];
+			newName = names[1];
+			File fileToBeRenamed = new File(currentPath + "\\" + NameOfFileToBeRenamed);
+			File newFileName = new File(currentPath + "\\" + newName);
+			if(fileToBeRenamed.exists())
+				fileToBeRenamed.renameTo(newFileName);
+			else
+				System.out.println("Couldn't find specified file");
+		}else
+			System.out.println("The syntax of the command is incorrect");
+	}
+	
+	public void replaceFile(String currentPath, String input) {										// method for files replacement
+		String command = input.substring(8);
+		String NameOfDeeperDirectory, donorName;
+		String[] names = command.split(" ");
+		if(names.length == 2) {
+			donorName = names[0];
+			NameOfDeeperDirectory = names[1];
+			File replacingFile = new File(currentPath + "\\" + donorName);
+			File fileToBeReplaced = new File(currentPath + "\\" + NameOfDeeperDirectory + "\\" + donorName);
+			if(fileToBeReplaced.exists() && replacingFile.exists()) {
+				try {
+					Files.copy(replacingFile.toPath(), fileToBeReplaced.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}else
+				System.out.println("Couldn't find specified file");
+		}else
+			System.out.println("The syntax of the command is incorrect");
+	}
+	
+	public void copyFile(String currentPath, String input) {										// method for copying files
+		String command = input.substring(5);
+		String NameOfFileToBeCopied, copyPathName;
+		String[] names = command.split(" ");
+		if(names.length == 2) {
+			NameOfFileToBeCopied = names[0];
+			copyPathName = names[1];
+			File fileToBeCopied = new File(currentPath + "\\" + NameOfFileToBeCopied);
+			File copyPath = new File(currentPath + "\\" + copyPathName);
+			if(fileToBeCopied.exists() && fileToBeCopied.isFile()) {
+				try {
+					Files.copy(fileToBeCopied.toPath(), copyPath.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}else
+				System.out.println("Couldn't find specified file");
+		}else
+			System.out.println("The syntax of the command is incorrect");
+	}
+	
+	public void moveFile(String currentPath, String input, Scanner in) {							// method for moving files
+		String command = input.substring(5);
+		String NameOfFileToBeMoved, movePathName;
+		String[] names = command.split(" ");
+		if(names.length == 2) {
+			NameOfFileToBeMoved = names[0];
+			movePathName = names[1];
+			File fileToBeMoved = new File(currentPath + "\\" + NameOfFileToBeMoved);
+			File movePath = new File(currentPath + "\\" + movePathName);
+			if(fileToBeMoved.exists() && fileToBeMoved.isFile()) {
+				if(movePath.exists() && movePath.isDirectory())
+					movePath = new File(currentPath + "\\" + movePathName + "\\" + NameOfFileToBeMoved);
+				if(movePath.exists() && movePath.isFile()) {
+					String makeChoice = "NO", optionYes = "YES", optionNo = "NO";
+					boolean exit = true;
+					while(exit) {
+						System.out.print("Overwrite " + movePath + "? (Yes/No):");
+						makeChoice = in.nextLine();
+						if(makeChoice.equalsIgnoreCase(optionYes) || makeChoice.equalsIgnoreCase(optionNo))
+							exit = false;
+					}
+					boolean ifWantsOverrite = false;
+					if(makeChoice.equalsIgnoreCase("YES"))
+						ifWantsOverrite = true;
+					if(ifWantsOverrite) {
+						try {
+							Files.copy(fileToBeMoved.toPath(), movePath.toPath(), StandardCopyOption.REPLACE_EXISTING);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						fileToBeMoved.delete();
+					}
+				}else {
+					try {
+						Files.copy(fileToBeMoved.toPath(), movePath.toPath());
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					fileToBeMoved.delete();
+				}
+			}else
+				System.out.println("Couldn't find specified file");
+		}else
+			System.out.println("The syntax of the command is incorrect");
+	}
+
+	public void showDir(String currentPath) {														// method listing all files and directories in actual working directory
+		File currentDirectory = new File(currentPath);
+		String[] directoryContent = currentDirectory.list();
+		for(String positionOnList : directoryContent)
+			System.out.println(positionOnList);
 	}
 }
 	

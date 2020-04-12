@@ -89,7 +89,7 @@ public class Main {
 				String temp = cmd.spaceSearchDirect(cmd.clearSlash(input.substring(3)));
 				if(temp.length() > 1 && temp.charAt(1) == ':')
 					currentPath = cmd.createCDDirect(currentPath, input, isForMkdirCommand);			// 4
-//		 works correct for for example: <cd    C:\\\Users\mHm_MaXi\\\Desktop\AKADEMIA KODU\\\23 zajecia\2 zadanie (logowania) Konrad\\\\\>
+//		 			works correct for for example: <cd    C:\\\Users\mHm_MaXi\\\Desktop\AKADEMIA KODU\\\23 zajecia\2 zadanie (logowania) Konrad\\\\\>
 				else if(temp.length() > 1 && temp.substring(0, 2).equals("/D"))
 					currentPath = cmd.createCDDiskDirect(currentPath, input);							// 5
 				else
@@ -113,17 +113,40 @@ public class Main {
 				String temp = cmd.spaceSearchDirect(cmd.clearSlash(input.substring(6)));
 				if(temp.length() > 1 && temp.charAt(1) == ':')
 					currentPath = cmd.createCHDIRDirect(currentPath, input);							// 12
-//		 works correct for for example: <chdir    C:\\\Users\mHm_MaXi\\\Desktop\AKADEMIA KODU\\\23 zajecia\2 zadanie (logowania) Konrad\\\\\>
+//			 		works correct for for example: <chdir    C:\\\Users\mHm_MaXi\\\Desktop\AKADEMIA KODU\\\23 zajecia\2 zadanie (logowania) Konrad\\\\\>
 				else if(temp.length() > 1 && temp.substring(0, 2).equals("/D"))
 					currentPath = cmd.createCHDIRDiskDirect(currentPath, input);						// 13
 				else
 					currentPath = cmd.createCHDIRSimple(currentPath, input);							// 14
 			}else if(input.equalsIgnoreCase("chdir.."))
 				currentPath = cmd.enterPreviousCHDIR(currentPath);										// 15
-			
-				
-			
-
+			else if(input.startsWith("md ")){
+				String temp = cmd.spaceSearchDirect(cmd.clearSlash(input.substring(3)));
+				temp = cmd.makeCompatible(temp);
+				if(temp.length() > 5 && temp.charAt(4) == ':') {
+					cmd.makeDirectoryDirect(currentPath, temp);
+				}else
+					cmd.makeDirectorySimple(currentPath, temp);
+			}else if(input.equalsIgnoreCase("time"))
+				cmd.showTime();																			// 16
+			else if(input.equalsIgnoreCase("ver"))
+				cmd.showVersion();																		// 17
+			else if(input.startsWith("del "))
+				cmd.deleteFile(currentPath, input);														// 18
+			else if(input.startsWith("rmdir "))
+				cmd.removeDirectory(currentPath, input);												// 19
+			else if(input.startsWith("rename "))
+				cmd.renameFile(currentPath, input);														// 20
+			else if(input.startsWith("replace "))
+				cmd.replaceFile(currentPath, input);													// 21
+			else if(input.startsWith("ren "))
+				cmd.renFile(currentPath, input);
+			else if(input.startsWith("copy "))
+				cmd.copyFile(currentPath, input);														// 22
+			else if(input.startsWith("move "))
+				cmd.moveFile(currentPath, input, in);													// 23
+			else if(input.equalsIgnoreCase("dir"))
+				cmd.showDir(currentPath);																// 24
 		}
 		return currentPath;
 	}
