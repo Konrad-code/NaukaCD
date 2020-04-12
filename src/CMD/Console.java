@@ -14,8 +14,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 public class Console {
-	private ArrayList<String> simpleCommands = new ArrayList<String>(Arrays.asList("cd", "cd..", "help", "dir", "exit", "cmd"));
-	private ArrayList<String> extendedCommands = new ArrayList<String>(Arrays.asList("cd ", "mkdir ", "replace ", "rename ", "rmdir ", "del "));
+	private ArrayList<String> simpleCommands = new ArrayList<String>(Arrays.asList("cd", "cd..", "help", "dir", "exit", "cmd", "chdir", "chdir.."));
+	private ArrayList<String> extendedCommands = new ArrayList<String>(Arrays.asList("cd ", "mkdir ", "replace ", "rename ", "rmdir ", "del ", "chdir "));
 	private HashMap<String, String> helpCommands = new HashMap<String, String>();
 	private List<Map.Entry<String, String>> sortedHelpCommands = new ArrayList<Map.Entry<String, String>>(helpCommands.entrySet());
 	private ArrayList<String> drivesList = new ArrayList<String>();
@@ -28,7 +28,7 @@ public class Console {
 	
 	private void fillHelp() {															// filling of hashmap of help commands and their desctriptions from Windows CMD				
 		helpCommands.put("CD", "Displays the name of or changes the current directory");
-//		helpCommands.put("CD..", "Changes the current directory to a higher directory");
+		helpCommands.put("CD..", "Changes the current directory to a higher directory");
 //		helpCommands.put("MKDIR", "Creates a directory");
 		helpCommands.put("HELP", "Provides Help information for Windows commands");
 //		helpCommands.put("DIR", "Displays a list of files and subdirectories in a directory");
@@ -38,12 +38,15 @@ public class Console {
 //		helpCommands.put("RMDIR", "Removes a directory");
 //		helpCommands.put("DEL", "Deletes one file");
 		helpCommands.put("CMD", "Starts a new instance of the Windows command interpreter");
-		helpCommands.put("CD [..]", "  ..   Specifies that you want to change to the parent directory");
+		helpCommands.put("CD [path]", "Changes the current directory to specified in a direct path");
 		helpCommands.put("CD [/D] [drive:][path]", "Use the /D switch to change current drive in addition to changing current directory for a drive");
+		helpCommands.put("CHDIR [path]", "Changes the current directory to specified in a direct path");
+		helpCommands.put("CHDIR", "Displays the name of or changes the current directory");
+		helpCommands.put("CHDIR..", "Changes the current directory to a higher directory");
 		
 	}
 	
-	private void sortHelp() {															// method sorting help commands hashmap keys by alphabet
+	private void sortHelp() {																		// method sorting help commands hashmap keys by alphabet
 		final Collator collator = Collator.getInstance(new Locale("us"));
 		List<Map.Entry<String, String>> list = new ArrayList<Map.Entry<String, String>>(helpCommands.entrySet());
 		
@@ -56,7 +59,7 @@ public class Console {
 		sortedHelpCommands.addAll(list);
 	}
 	
-	private void fillDisksList() {														// method filling arraylist with names of user's partitions in format <C:>
+	private void fillDisksList() {																	// method filling arraylist with names of user's partitions in format <C:>
 		File[] partitions = File.listRoots();
 	    for (File p : partitions) {
 	    	StringBuilder temp = new StringBuilder(p.toString());
@@ -65,15 +68,21 @@ public class Console {
 		}
 	}
 	
-	public ArrayList<String> getSimpleCommands() {										// getter for list of simple commands
+	public ArrayList<String> getSimpleCommands() {													// getter for list of simple commands
 		return simpleCommands;
 	}
 
-	public ArrayList<String> getExtendedCommands() {									// getter for list of extended commands
+	public ArrayList<String> getExtendedCommands() {												// getter for list of extended commands
 		return extendedCommands;
 	}
 
-	public String clearSlash(String addPath) {											// reduce multiple slashes in path
+	public String makeCompatible(String temp) {														// method adding "cd " before path to adapt it being modified by next methods
+		String cd = "cd ";
+		temp = cd.concat(temp);
+		return temp;
+	}
+	
+	public String clearSlash(String addPath) {														// reduce multiple slashes in path
 		char[] slashSearch = addPath.toCharArray();
 		StringBuilder slashString = new StringBuilder();
 		char c, temp = slashSearch[slashSearch.length - 1];
@@ -91,7 +100,7 @@ public class Console {
 		return addPath;
 	}
 	
-	private boolean checkLegit(String addPath) {										// method checking if path doesn't contain forbidden signs
+	private boolean checkLegit(String addPath) {													// method checking if path doesn't contain forbidden signs
 		char[] pathLetters = addPath.toCharArray();
 		boolean legitCheck = true;
 //		System.out.println("Extracted path: " + addPath);
@@ -106,42 +115,14 @@ public class Console {
 		return legitCheck;
 	}
 	
-	private ArrayList<String> spaceSearch(ArrayList<String> pathInception){				// reduce space chars before exact path
-				for(String p : pathInception) {													// print out path structure
-					System.out.println("Folder: " + p);
-				}
+	private ArrayList<String> spaceSearch(ArrayList<String> pathInception){							// reduce space chars before exact path
+//				for(String p : pathInception) {													// print out path structure
+//					System.out.println("Folder: " + p);
+//				}
 		char[] spaceSearch = pathInception.get(0).toCharArray();
 		StringBuilder newString = new StringBuilder();
 		boolean ifEntered = false, nonSpaceSpotted = false;
 //			System.out.println(pathInception.get(0));
-		if(spaceSearch[0] == ' ') {
-			ifEntered = true;
-			for(int i = 0; i < spaceSearch.length; i++) {
-				if(nonSpaceSpotted) {
-					newString.append(spaceSearch[i]);
-					System.out.println("i" + i + "znak: " + spaceSearch[i]);
-				}
-				if(i + 1 < spaceSearch.length && !nonSpaceSpotted)
-					if(spaceSearch[i + 1] != ' ')
-						nonSpaceSpotted = true;
-			}
-			System.out.println("pierwsze ze spacja");
-		}
-				for(String p : pathInception) {													// print out path structure
-					System.out.println(p);
-				}
-		if(nonSpaceSpotted) {
-			pathInception.set(0, newString.toString());
-//			System.out.println("weszlo");
-		}else if(ifEntered && !nonSpaceSpotted)
-			return null;
-		return pathInception;
-	}
-	
-	public String spaceSearchDirect(String addPath){									// reduce space chars before exact path for direct path method
-		char[] spaceSearch = addPath.toCharArray();
-		StringBuilder newString = new StringBuilder();
-		boolean ifEntered = false, nonSpaceSpotted = false;
 		if(spaceSearch[0] == ' ') {
 			ifEntered = true;
 			for(int i = 0; i < spaceSearch.length; i++) {
@@ -153,17 +134,40 @@ public class Console {
 					if(spaceSearch[i + 1] != ' ')
 						nonSpaceSpotted = true;
 			}
-//			System.out.println("pierwsze ze spacja");
 		}
-		if(nonSpaceSpotted) {
+//				for(String p : pathInception) {													// print out path structure
+//					System.out.println(p);
+//				}
+		if(nonSpaceSpotted) 
+			pathInception.set(0, newString.toString());
+		else if(ifEntered && !nonSpaceSpotted)
+			return null;
+		return pathInception;
+	}
+	
+	public String spaceSearchDirect(String addPath){												// reduce space chars before exact path for direct path method
+		char[] spaceSearch = addPath.toCharArray();
+		StringBuilder newString = new StringBuilder();
+		boolean ifEntered = false, nonSpaceSpotted = false;
+		if(spaceSearch[0] == ' ') {
+			ifEntered = true;
+			for(int i = 0; i < spaceSearch.length; i++) {
+				if(nonSpaceSpotted) {
+					newString.append(spaceSearch[i]);
+				}
+				if(i + 1 < spaceSearch.length && !nonSpaceSpotted)
+					if(spaceSearch[i + 1] != ' ')
+						nonSpaceSpotted = true;
+			}
+		}
+		if(nonSpaceSpotted) 
 			addPath = newString.toString();
-			System.out.println("weszlo");
-		}else if(ifEntered && !nonSpaceSpotted)
+		else if(ifEntered && !nonSpaceSpotted)
 			return null;
 		return addPath;
 	}
 	
-	private ArrayList<String> createArray(int size, String addPath) {					// create arraylist which consists of folders making full path
+	private ArrayList<String> createArray(int size, String addPath) {								// create arraylist which consists of folders making full path
 		ArrayList<String> pathInception = new ArrayList<String>();
 		String path = addPath;
 		String toAdd = "";
@@ -181,35 +185,9 @@ public class Console {
 		return pathInception;
 	}
 	
-	private ArrayList<String> preparePathDirect(String addPath, String currentPath) {	// method preparing path as an arraylist with included calls of methods: clearSlash, spaceSearchDirect, checkLegit, createArray; for direct path entry method 
-		ArrayList<String> pathInception = new ArrayList<String>();
-		addPath = clearSlash(addPath);
-		addPath = spaceSearchDirect(addPath);
-		int size = 0;
-		String tmp = "";
-		if(addPath.length() > 2) {							// DISCLAIMER FOR PARTITION CHECK <C:\>
-			tmp = addPath.substring(0, 2);
-			addPath = addPath.substring(2);
-		}
-		boolean legitCheck = checkLegit(addPath);
-//		System.out.println(legitCheck);
-		if(!legitCheck) 
-			return null;
-		addPath = tmp.concat(addPath);						// DISCLAIMER REVERSAL
-		char[] pathLetters = addPath.toCharArray();
-		for(char c : pathLetters) {							// depth of folder penetration encounter
-			if(c == '\\')
-				size++;
-		}
-		pathInception.addAll(createArray(size, addPath));
-
-		return pathInception;
-	}
-	
-	private ArrayList<String> preparePathSimple(String addPath, String currentPath) {	// method preparing path as an arraylist with included calls of methods: clearSlash, spaceSearchDirect, checkLegit, createArray; for indirect/path-penetrating entry method
+	private ArrayList<String> preparePathSimple(String addPath, String currentPath) {				// method preparing path as an arraylist with included calls of methods: clearSlash, spaceSearchDirect, checkLegit, createArray; for indirect/path-penetrating entry method
 		ArrayList<String> pathInception = new ArrayList<String>();
 		int size = 0;
-		System.out.println(addPath);
 		addPath = clearSlash(addPath);
 		boolean legitCheck = checkLegit(addPath);
 		if(!legitCheck) 
@@ -224,38 +202,31 @@ public class Console {
 		return spaceSearch(pathInception);
 	}
 	
-	private String changePathCDDirect(String addPath, String currentPath) {				// method changing currentPath to new direct path entry if path leads to existing folder
-		String errorMessege = ">fail";
-		ArrayList<String> pathInception = preparePathDirect(addPath, currentPath);
-//		for(String p : pathInception) {													// print out path structure
-//			System.out.println(p);
-//		}
-		if(pathInception == null) 
-			return errorMessege;
-		boolean ifDirectPath = false;
-		for(String d : drivesList)
-	    	if(pathInception.get(0).equalsIgnoreCase(d))
-	    		ifDirectPath = true;
-		if(ifDirectPath) {																// DIRECT PATH ENTRY CASE
-			String directPath = "";
-			for(String nextFolder : pathInception) {
-				if(directPath.length() == 0)
-					directPath = directPath.concat(nextFolder);
-				else
-					directPath = directPath.concat("\\").concat(nextFolder);
-				File toEnter = new File(directPath);
-				if(!toEnter.exists()) {
-					System.out.println("Direct path failed at: " + directPath);
-					return errorMessege;
-				}
-				currentPath = directPath;
-			}
+	private ArrayList<String> preparePathDirect(String addPath, String currentPath) {				// method preparing path as an arraylist with included calls of methods: clearSlash, spaceSearchDirect, checkLegit, createArray; for direct path entry method 
+		ArrayList<String> pathInception = new ArrayList<String>();
+		addPath = clearSlash(addPath);
+		addPath = spaceSearchDirect(addPath);
+		int size = 0;
+		String tmp = "";
+		if(addPath.length() > 2) {							// DISCLAIMER FOR PARTITION CHECK <C:\>
+			tmp = addPath.substring(0, 2);
+			addPath = addPath.substring(2);
 		}
-//		System.out.println("Final path: " + currentPath);
-		return currentPath;
+		boolean legitCheck = checkLegit(addPath);
+		if(!legitCheck) 
+			return null;
+		addPath = tmp.concat(addPath);						// DISCLAIMER REVERSAL
+		char[] pathLetters = addPath.toCharArray();
+		for(char c : pathLetters) {							// depth of folder penetration encounter
+			if(c == '\\')
+				size++;
+		}
+		pathInception.addAll(createArray(size, addPath));
+
+		return pathInception;
 	}
 	
-	private String changePathCDSimple(String addPath, String currentPath) {				// method changing currentPath to new indirect/path-penetrating entry if path leads to existing folder
+	private String changePathCDSimple(String addPath, String currentPath) {							// method changing currentPath to new indirect/path-penetrating entry if path leads to existing folder
 		String errorMessege = ">fail";
 		ArrayList<String> pathInception = preparePathSimple(addPath, currentPath);
 //		for(String p : pathInception) {													// print out path structure
@@ -275,19 +246,60 @@ public class Console {
 		return currentPath;
 	}
 	
-	private String changePathDirectory(String addPath, String currentPath) {
+	private String changePathCDDirect(String addPath, String currentPath) {							// method changing currentPath to new direct path entry if path leads to existing folder
 		String errorMessege = ">fail";
 		ArrayList<String> pathInception = preparePathDirect(addPath, currentPath);
-//		for(String p : pathInception) {													// print out path structure
-//			System.out.println(p);
-//		}
 		if(pathInception == null) 
 			return errorMessege;
 		boolean ifDirectPath = false;
 		for(String d : drivesList)
 	    	if(pathInception.get(0).equalsIgnoreCase(d))
 	    		ifDirectPath = true;
-		if(ifDirectPath) {																// DIRECT PATH ENTRY CASE
+		if(ifDirectPath) {												// DIRECT PATH ENTRY CASE
+			String directPath = "";
+			for(String nextFolder : pathInception) {
+				if(directPath.length() == 0)
+					directPath = directPath.concat(nextFolder);
+				else
+					directPath = directPath.concat("\\").concat(nextFolder);
+				File toEnter = new File(directPath);
+				if(!toEnter.exists()) {
+					System.out.println("Direct path failed at: " + directPath);
+					return errorMessege;
+				}
+				currentPath = directPath;
+			}
+		}else
+			System.out.println("Cannot find specified disk");
+		return currentPath;
+	}
+	
+	private String makePathDirectorySimple(String addPath, String currentPath) {					// method realizing functionality of folder creation if given path has penetrating character
+		String errorMessege = ">fail";
+		ArrayList<String> pathInception = preparePathSimple(addPath, currentPath);
+		if(pathInception == null) 
+			return errorMessege;																	// PENETRATING ENTRY CASE
+		for(String nextFolder : pathInception) {
+			currentPath = currentPath.concat("\\").concat(nextFolder);
+			File toEnter = new File(currentPath);
+			if(!toEnter.exists()) {
+				toEnter.mkdir();
+				System.out.println("Created bridge folder at: " + currentPath);
+			}
+		}
+		return currentPath;
+	}
+	
+	private String makePathDirectoryDirect(String addPath, String currentPath) {					// method realizing functionality of folder creation if given path is direct
+		String errorMessege = ">fail";
+		ArrayList<String> pathInception = preparePathDirect(addPath, currentPath);
+		if(pathInception == null) 
+			return errorMessege;
+		boolean ifDirectPath = false;
+		for(String d : drivesList)
+	    	if(pathInception.get(0).equalsIgnoreCase(d))
+	    		ifDirectPath = true;
+		if(ifDirectPath) {
 			String directPath = "";
 			for(String nextFolder : pathInception) {
 				if(directPath.length() == 0)
@@ -301,24 +313,16 @@ public class Console {
 				}
 				currentPath = directPath;
 			}
-		}else 																			// PENETRATING ENTRY CASE
-			for(String nextFolder : pathInception) {
-					currentPath = currentPath.concat("\\").concat(nextFolder);
-					File toEnter = new File(currentPath);
-					if(!toEnter.exists()) {
-						toEnter.mkdir();
-						System.out.println("Created bridge folder at: " + currentPath);
-					}
-			}
-//		System.out.println("Final path: " + currentPath);
+		}else
+			System.out.println("Cannot find specified disk");
 		return currentPath;
 	}
-	
-	public void exit() {																// exit method
+		
+	public void exit() {																			// exit method
 		System.out.println("Zamknieto instancje okna komend");
 	}
 	
-	public void help() {																// help menu method
+	public void help() {																			// help menu method
 		System.out.println("For more information on a specific command, contact the author of the code\n");
 		
 //		PRINTING UNSORTED VALUES OF HELP MAP 
@@ -334,13 +338,110 @@ public class Console {
 	    }
 	}
 	
-	public void executeCD(String currentPath) {											// simple printing current working directory path
+	public void executeCD(String currentPath) {														// simple printing current working directory path
 		System.out.println(currentPath);
 	}
 	
-	public String createCDDirect(String currentPath, String input) {					// method for direct path entries or changing working driveto bare drive location as for eg. <C:\>
+	public String createCDSimple(String currentPath, String input, boolean isForMkdirCommand) {		// method for indirect path entries (basing on extending current path)
+		String addPath = input.substring(3);
+		String newPath = changePathCDSimple(addPath, currentPath);
+		if(newPath.equals(">fail")) {
+			if(!isForMkdirCommand)
+				System.out.println("The system cannot find the specified path.");
+			newPath = currentPath;
+		}
+		return newPath;
+	}
+	
+	public String createCDDirect(String currentPath, String input, boolean isForMkdirCommand) {		// method for direct path entries or changing working driveto bare drive location as for eg. <C:\>
 		String newPath = "";
 		String addPath = input.substring(3);
+		String currentDisk = currentPath.substring(0, 1);									// get disk from current path
+		boolean diskChange = true, ifOnDisksList = false;
+		for(String d : drivesList)															// check if user wants to change path to just clear disk path which is allowed
+	    	if(addPath.equalsIgnoreCase(d))
+	    		ifOnDisksList = true;
+		if(currentPath.length() >= addPath.length() && (ifOnDisksList || currentPath.substring(0, (addPath.length()) - 1).equalsIgnoreCase(addPath)))		// condition for same path & shallower folder penetration or changing to bare disk path
+			newPath = addPath;
+		else
+			newPath = changePathCDDirect(addPath, currentPath);
+		String newPathDisk = newPath.substring(0, 1);										// get disk from new path
+//		System.out.println("newPathDisk = " + newPathDisk + " currentDisk = " + currentDisk);
+    	if(newPathDisk.equalsIgnoreCase(currentDisk))										// check if disk from new path is the same as in current path
+    		diskChange = false;
+		if(!ifOnDisksList && diskChange && !newPath.equalsIgnoreCase(currentPath))													// if user changes path to another disk and its not a clear disk path
+			newPath = ">fail";
+		if(newPath.equals(">fail")) {
+			if(!isForMkdirCommand)
+				System.out.println("The system cannot find the specified path.");
+			newPath = currentPath;
+		}
+		return newPath;
+	}
+	
+	public String createCDDiskDirect(String currentPath, String input) {							// method for direct path entries with special functionality of changing working drive to an exact level of specified direct location
+//		System.out.println("wywolano Disk Change Direct");
+		String newPath = "";
+		String addPath = input.substring(6);
+		boolean ifOnDisksList = false;
+		for(String d : drivesList)
+	    	if(addPath.equalsIgnoreCase(d))
+	    		ifOnDisksList = true;
+		if(currentPath.length() >= addPath.length() && (ifOnDisksList || currentPath.substring(0, (addPath.length()) - 1).equalsIgnoreCase(addPath)))
+			newPath = addPath;
+		else
+		newPath = changePathCDDirect(addPath, currentPath);
+		if(newPath.equals(">fail")) {
+			System.out.println("The system cannot find the specified path.");
+			newPath = currentPath;
+		}
+		return newPath;
+	}
+		
+	public String enterPrevious(String currentPath) {												// method returns path of higher folder
+		if(currentPath.indexOf('\\') != -1) {
+			StringBuilder newPath = new StringBuilder(currentPath);
+			newPath.reverse();
+			newPath.delete(0, newPath.indexOf("\\") + 1).reverse();
+			currentPath = newPath.toString();
+		}
+		return currentPath;
+	}
+	
+	public void makeDirectorySimple(String currentPath, String input) {								// method creating new directory starting from current path
+		boolean isForMkdirCommand = true;
+		String cdDirectEntry = createCDSimple(currentPath, input, isForMkdirCommand);		// if entry is successful, returns path different from currentPath
+		if(!currentPath.equalsIgnoreCase(cdDirectEntry))
+			System.out.println("A subdirectory or file eclipse already exists.");
+		else{
+			String addPath = input.substring(3);
+			String newPath = makePathDirectorySimple(addPath, currentPath);
+			if(newPath.equals(">fail"))
+				System.out.println("The file name, directory name, or volume label syntax is incorrect, or unknown error has occured");
+		}
+	}
+	
+	public void makeDirectoryDirect(String currentPath, String input) {								// method creating new directory using given direct path
+		boolean isForMkdirCommand = true;
+		String cdDirectEntry = createCDDirect(currentPath, input, isForMkdirCommand);		// if entry is successful, returns path different from currentPath
+		if(!currentPath.equalsIgnoreCase(cdDirectEntry))
+			System.out.println("A subdirectory or file eclipse already exists");
+		else {
+			String addPath = input.substring(3);
+			String newPath = addPath;
+			newPath = makePathDirectoryDirect(addPath, currentPath);
+			if(newPath.equals(">fail"))
+				System.out.println("The file name, directory name, or volume label syntax is incorrect, or unknown error has occured");
+		}
+	}
+	
+	public void executeCHDIR(String currentPath) {													// simple printing current working directory path
+		System.out.println(currentPath);
+	}
+	
+	public String createCHDIRDirect(String currentPath, String input) {								// method for direct path entries or changing working driveto bare drive location as for eg. <C:\>
+		String newPath = "";
+		String addPath = input.substring(6);
 		String currentDisk = currentPath.substring(0, 1);
 		boolean diskChange = true, ifOnDisksList = false;
 		for(String d : drivesList)
@@ -354,7 +455,7 @@ public class Console {
 //		System.out.println("newPathDisk = " + newPathDisk + " currentDisk = " + currentDisk);
     	if(newPathDisk.equalsIgnoreCase(currentDisk))
     		diskChange = false;
-		if(!ifOnDisksList && diskChange)
+		if(!ifOnDisksList && diskChange && !newPath.equalsIgnoreCase(currentPath))
 			newPath = ">fail";
 		if(newPath.equals(">fail")) {
 			System.out.println("User entered invalid(unexisting) path. Operation aborted.");
@@ -363,9 +464,9 @@ public class Console {
 		return newPath;
 	}
 		
-	public String createCDSimple(String currentPath, String input) {					// method for indirect path entries (basing on extending current path)
+	public String createCHDIRSimple(String currentPath, String input) {								// method for indirect path entries (basing on extending current path)
 		String newPath = "";
-		String addPath = input.substring(3);
+		String addPath = input.substring(6);
 		newPath = changePathCDSimple(addPath, currentPath);
 		if(newPath.equals(">fail")) {
 			System.out.println("User entered invalid(unexisting) path. Operation aborted.");
@@ -374,10 +475,10 @@ public class Console {
 		return newPath;
 	}
 	
-	public String createCDDiskDirect(String currentPath, String input) {				// method for direct path entries with special functionality of changing working drive to an exact level of specified direct location
-		System.out.println("wywolano Disk Change Direct");
+	public String createCHDIRDiskDirect(String currentPath, String input) {							// method for direct path entries with special functionality of changing working drive to an exact level of specified direct location
+//		System.out.println("wywolano Disk Change Direct");
 		String newPath = "";
-		String addPath = input.substring(6);
+		String addPath = input.substring(9);
 		boolean ifOnDisksList = false;
 		for(String d : drivesList)
 	    	if(addPath.equalsIgnoreCase(d))
@@ -393,61 +494,15 @@ public class Console {
 		return newPath;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	public void makeDirectory(String currentPath, String input) {
-		String addPath = input.substring(6);
-		int slashCounter = 0;
-		int newFolderLength = 0;
-		File newFolder;
-		String folder = "";
-		if(addPath.charAt(addPath.length() - 1) == '\\')
-			addPath = addPath.substring(0, addPath.length() - 1);
-		char[] path = addPath.toCharArray();
-		for(char c : path) {
-			if(c == '\\')
-				slashCounter++;
+	public String enterPreviousCHDIR(String currentPath) {											// method returns path of higher folder
+		if(currentPath.indexOf('\\') != -1) {
+			StringBuilder newPath = new StringBuilder(currentPath);
+			newPath.reverse();
+			newPath.delete(0, newPath.indexOf("\\") + 1).reverse();
+			currentPath = newPath.toString();
 		}
-		if(slashCounter > 0) {
-			StringBuilder sb = new StringBuilder(addPath);
-			sb.reverse();
-			char[] reversedPath = sb.toString().toCharArray();
-			for(int i = 0; reversedPath[i] != '\\'; i++) {
-				newFolderLength++;
-			}
-			folder = addPath.substring(addPath.length() - newFolderLength);
-			addPath = addPath.substring(0, addPath.length() - (newFolderLength + 1));
-//			System.out.println(addPath + " " + folder);
-		}else
-			folder = addPath;
-		if(checkLegit(folder)) {
-			if(slashCounter > 0) {
-				String newPath = changePathDirectory(addPath, currentPath);
-				if(newPath.equals(">fail"))
-					System.out.println("User entered invalid path consisting of illegal symbols. Operation aborted.");
-				newFolder = new File(newPath + "\\" + folder);
-			}else {
-				newFolder = new File(currentPath + "\\" + folder);
-			}
-			if(newFolder.exists()) {
-				System.out.println("Specified directory for name entered by user already exists");
-			}else
-				newFolder.mkdir();
-		}
+		return currentPath;
 	}
-	
-	
 }
 	
 	

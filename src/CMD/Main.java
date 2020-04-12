@@ -74,41 +74,56 @@ public class Main {
 		boolean exit = false;
 		String currentPath = homePath;
 		String input = "";
-		int i = 0;
 		while(!exit) {
+			boolean isForMkdirCommand = false;
 			System.out.print(currentPath + ">");
 			input = provideInput(cmd, in, currentPath);
 			if(input.equalsIgnoreCase("exit")) { 
-				cmd.exit();
+				cmd.exit();																				// 1
 				exit = true;
 			}else if(input.equalsIgnoreCase("help")) 
-				cmd.help();
+				cmd.help();																				// 2
 			else if(input.equalsIgnoreCase("cd")) 
-				cmd.executeCD(currentPath);
+				cmd.executeCD(currentPath);																// 3
 			else if(input.startsWith("cd ")) {
 				String temp = cmd.spaceSearchDirect(cmd.clearSlash(input.substring(3)));
-				System.out.println(temp.substring(0, 2));
 				if(temp.length() > 1 && temp.charAt(1) == ':')
-					currentPath = cmd.createCDDirect(currentPath, input);
+					currentPath = cmd.createCDDirect(currentPath, input, isForMkdirCommand);			// 4
 //		 works correct for for example: <cd    C:\\\Users\mHm_MaXi\\\Desktop\AKADEMIA KODU\\\23 zajecia\2 zadanie (logowania) Konrad\\\\\>
 				else if(temp.length() > 1 && temp.substring(0, 2).equals("/D"))
-					currentPath = cmd.createCDDiskDirect(currentPath, input);
+					currentPath = cmd.createCDDiskDirect(currentPath, input);							// 5
 				else
-					currentPath = cmd.createCDSimple(currentPath, input);
-			}else if(input.startsWith("mkdir ")) {
-				cmd.makeDirectory(currentPath, input);
+					currentPath = cmd.createCDSimple(currentPath, input, isForMkdirCommand);			// 6
+			}else if(input.equalsIgnoreCase("cd.."))
+				currentPath = cmd.enterPrevious(currentPath);											// 7
+			else if(input.startsWith("mkdir ")) {
+				String temp = cmd.spaceSearchDirect(cmd.clearSlash(input.substring(6)));
+				temp = cmd.makeCompatible(temp);
+				if(temp.length() > 5 && temp.charAt(4) == ':') {
+					cmd.makeDirectoryDirect(currentPath, temp);											// 8
+				}else
+					cmd.makeDirectorySimple(currentPath, temp);											// 9
 			}else if(input.equalsIgnoreCase("cmd")) {
 				String tempPath = currentPath;
-				runConsole(new Console(), in, currentPath);
+				runConsole(new Console(), in, currentPath);												// 10
 				currentPath = tempPath;
-			}
+			}else if(input.equalsIgnoreCase("chdir")) 
+				cmd.executeCHDIR(currentPath);															// 11
+			else if(input.startsWith("chdir ")) {
+				String temp = cmd.spaceSearchDirect(cmd.clearSlash(input.substring(6)));
+				if(temp.length() > 1 && temp.charAt(1) == ':')
+					currentPath = cmd.createCHDIRDirect(currentPath, input);							// 12
+//		 works correct for for example: <chdir    C:\\\Users\mHm_MaXi\\\Desktop\AKADEMIA KODU\\\23 zajecia\2 zadanie (logowania) Konrad\\\\\>
+				else if(temp.length() > 1 && temp.substring(0, 2).equals("/D"))
+					currentPath = cmd.createCHDIRDiskDirect(currentPath, input);						// 13
+				else
+					currentPath = cmd.createCHDIRSimple(currentPath, input);							// 14
+			}else if(input.equalsIgnoreCase("chdir.."))
+				currentPath = cmd.enterPreviousCHDIR(currentPath);										// 15
+			
 				
 			
-			
-			
-//			i++;
-//			if(i == 15)
-//				exit = true;
+
 		}
 		return currentPath;
 	}
